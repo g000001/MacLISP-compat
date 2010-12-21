@@ -14,7 +14,7 @@
 ;;;
 ;;; This is a LAMBDA binding macro that will open a lisp file object
 ;;; in such a way that it is automatically closed when the lambda binding
-;;; range is exited. 
+;;; range is exited.
 ;;;
 ;;; Syntax:
 ;;;
@@ -38,7 +38,7 @@
 ;;;   [3] All files are closed upon any exit from the LAMBDA (including
 ;;;       normal exit, ^G Quit, or an error).
 ;;;
-;;;   
+;;;
 ;;; Expands into:
 ;;;
 ;;; ((LAMBDA (<temp> <var1> <var2> ... <varN>)
@@ -71,39 +71,39 @@
 ;;;	    Lisp in a hung state.
 ;;;
 
-(DEFUN (IOTA MACRO) (X)
+(IN-PACKAGE :MACLISP)
+
+(DEFMACRO IOTA (&WHOLE X &REST ARGS)
+   (DECLARE (IGNORE ARGS))
    (LET* ((STREAMS (CADR X))
 	  (BODY (CDDR X))
 	  (VARS (MAPCAR 'CAR STREAMS))
 	  (VALS (MAPCAR #'(LAMBDA (X) `(LIST ,@(CDR X))) STREAMS))
-	  (TEMP (GENSYM 'F)))
-	 `((LAMBDA (,TEMP ,@VARS)
+          (OPEN-P-VARS (MAPCAR #'(LAMBDA (THING) THING
+                                         (GENSYM "OPEN-P-")) STREAMS))
+	  (TEMP (GENSYM "F")))
+	 `((LAMBDA (,TEMP ,@VARS ,@OPEN-P-VARS)
 		   (UNWIND-PROTECT
 		    (PROGN
-		     (WITHOUT-INTERRUPTS
+		     (#+SBCL SB-SYS:WITHOUT-INTERRUPTS
+                      #-SBCL WITHOUT-INTERRUPTS
 		      ,@(MAPCAR #'(LAMBDA (X)
-				    `(SETQ ,X (APPLY 'OPEN (POP ,TEMP))))
+				    `(SETQ ,X (APPLY #'OPEN (POP ,TEMP))))
 				VARS))
-		     ,@BODY)
-		    ,@ (MAPCAR #'(LAMBDA (VAR)
-				   #+LISPM
-				     `(AND
-					(CLOSUREP ,VAR)
-					(MEMQ ':CLOSE
-					      (FUNCALL ,VAR ':WHICH-OPERATIONS))
-					(CLOSE ,VAR))
-				   #-LISPM
-				     `(AND (OR (FILEP ,VAR)
-					       (AND (STATUS FEATURE SFA)
-						    (SFAP ,VAR)))
-					   (CLOSE ,VAR)))
-			       VARS)))
+		     ,@BODY
+                     ,@(MAPCAR #'(LAMBDA (X) `(SETQ ,X NIL)) OPEN-P-VARS))
+		    ,@(MAPCAR #'(LAMBDA (VAR OPEN-P)
+                                  `(AND ,VAR (CLOSE ,VAR :ABORT ,OPEN-P)))
+			       VARS
+                               OPEN-P-VARS)))
 	   (LIST . ,VALS)
 	   ,@(MAPCAR #'(LAMBDA (THING) THING ()) ; Create a list of NILs
-		     VARS))))
+		     VARS)
+           ,@(MAPCAR #'(LAMBDA (THING) THING T) ; Create a list of Ts
+		     OPEN-P-VARS))))
 
 
-;;; PHI 
+;;; PHI
 ;;;
 ;;; Mnemonic basis: PHI is a special LAMBDA for PHIle object binding.
 ;;;
@@ -123,7 +123,7 @@
 ;;;			    the EVAL'd form of <formK>.
 ;;;			    for K = 1 thru N.
 ;;;
-;;;   [2] <form1> ... <formN> are evaluated outside of the scope of 
+;;;   [2] <form1> ... <formN> are evaluated outside of the scope of
 ;;;			      <var1> ... <varN> according to traditional
 ;;;			      LET-semantics. They should return file objects
 ;;;			      or SFA's.
@@ -187,7 +187,7 @@
 ;;;
 ;;;   Notes:
 ;;;
-;;;     (1) MY-SFA-MAKER is of course not a Lisp builtin function. 
+;;;     (1) MY-SFA-MAKER is of course not a Lisp builtin function.
 ;;;	    Presumably it returns an SFA object of the proper type.
 ;;;
 ;;;     (2) This function should never be called on TYO, TYI, or T
@@ -195,23 +195,28 @@
 ;;;	    Lisp in a hung state.
 ;;;
 
-(DEFUN (PHI MACRO) (FORM)
+(DEFMACRO PHI (&WHOLE FORM &REST ARGS)
+       (DECLARE (IGNORE ARGS))
        (LET ((TEMP1 (GENSYM))
 	     (TEMP2 (GENSYM))
 	     (FORMS (CADR FORM))
 	     (BODY (CDDR FORM))
 	     (VARLIST ())
+             (OPEN-P-VARS ())
 	     (FORMLIST ()))
 	    (DO ((FORMS FORMS (CDR FORMS)))
 		((NULL FORMS)
 		 (SETQ VARLIST  (NREVERSE VARLIST))
-		 (SETQ FORMLIST (NREVERSE FORMLIST)))
-		(PUSH (CAAR FORMS)   VARLIST)
+		 (SETQ FORMLIST (NREVERSE FORMLIST))
+                 (SETQ OPEN-P-VARS (NREVERSE OPEN-P-VARS)))
+		(PUSH (CAAR FORMS) VARLIST)
+                (PUSH (GENSYM "OPEN-P-") OPEN-P-VARS)
 		(PUSH (CADAR FORMS) FORMLIST))
 	    `((LAMBDA (,TEMP1 ,TEMP2)
 	       (UNWIND-PROTECT
 		(PROGN
-		 (WITHOUT-INTERRUPTS
+		 (#+SBCL SB-SYS:WITHOUT-INTERRUPTS
+                  #-SBCL WITHOUT-INTERRUPTS
 		   ,@(NREVERSE
 		      (MAPCAN #'(LAMBDA (X)
 					`((SETQ ,TEMP1
@@ -221,63 +226,47 @@
 			      (REVERSE FORMLIST)))
 		   (SETQ ,TEMP2 ())
 		   (SETQ ,TEMP1 (REVERSE ,TEMP1)))
-		 ((LAMBDA ,VARLIST
+		 ((LAMBDA (,@VARLIST ,@OPEN-P-VARS)
 			  (UNWIND-PROTECT
 			   (PROGN
 			    ,@(MAPCAN #'(LAMBDA (X)
 					  `((SETQ ,X (CAR ,TEMP1))
 					    (SETQ ,TEMP1 (CDR ,TEMP1))))
 				      VARLIST)
-			    ,@BODY)
-			   ,@ (MAPCAR #'(LAMBDA (VAR)
-					  #+LISPM
-					    `(AND
-					       (CLOSUREP ,VAR)
-					       (MEMQ ':CLOSE
-						     (FUNCALL ,VAR
-							 ':WHICH-OPERATIONS))
-					       (CLOSE ,VAR))
-					  #-LISPM
-					    `(AND (OR (FILEP ,VAR)
-						      (AND (STATUS FEATURE SFA)
-							   (SFAP ,VAR)))
-						  (CLOSE ,VAR)))
-				      VARLIST)))
+			    ,@BODY
+                            ,@(MAPCAR #'(LAMBDA (OPEN-P)
+                                          `(SETQ ,OPEN-P NIL))
+                                      OPEN-P-VARS))
+			   ,@ (MAPCAR #'(LAMBDA (VAR OPEN-P)
+                                          `(AND ,VAR (CLOSE ,VAR :ABORT ,OPEN-P)))
+				      VARLIST
+                                      OPEN-P-VARS)))
 		  ,@(MAPCAR #'(LAMBDA (THING) THING ()) ; List of NILs
-			    VARLIST)))
-		(COND ((OR (FILEP ,TEMP2) (AND (STATUS FEATURE SFA)
-					       (SFAP ,TEMP2)))
-		       (CLOSE ,TEMP2)))
-		(DO ((X ,TEMP1 (CDR X)))
-		     ((NULL X))
-		     (COND (#-LISPM (OR (FILEP (CAR X))
-					(AND (STATUS FEATURE SFA)
-					     (SFAP (CAR X))))
-			    #+LISPM (AND (CLOSUREP (CAR X))
-					 (MEMQ ':CLOSE (FUNCALL (CAR X) ':WHICH-OPERATIONS)))
-			    (CLOSE (CAR X)))))))
+			    VARLIST)
+                  ,@(MAPCAR #'(LAMBDA (THING) THING T) ; Create a list of Ts
+                            OPEN-P-VARS)))))
 	      () ())))
-	    
+
 
 ;;; Mnemonic basis: PI is a special form for binding Program Interrupts
 ;;;
 ;;; PI has been replaced by the Maclisp system function WITHOUT-INTERRUPTS
 
-(DEFUN (PI MACRO) (X) 
+#|(DEFUN (PI MACRO) (X)
    (LET ((Y `(WITHOUT-INTERRUPTS ,(cdr x))))
      #-LISPM (SETQ Y (OR (MACROFETCH X) (MACROMEMO X Y 'PI)))
-     Y))
+     Y))|#
 
 
 ;;; Note that the package has loaded.
 
-(SSTATUS FEATURE #+LISPM : IOTA)
+#|(SSTATUS FEATURE #+LISPM : IOTA)|#
 
 #+LISPM (GLOBALIZE 'IOTA)
 #+LISPM (GLOBALIZE 'PHI)
 
 ;;; Version Number Support
-
+#||
 #-LISPM (HERALD IOTA /40)
-
+||#
 
