@@ -1,5 +1,10 @@
 (defpackage :maclisp
-  (:use :cl))
+  (:use :cl)
+  (:export :iota
+           :phi
+           :phi
+           :pi)
+  (:shadow :pi))
 
 (in-package :maclisp)
 

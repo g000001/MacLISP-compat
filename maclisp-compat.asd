@@ -3,5 +3,5 @@
 (asdf:defsystem #:maclisp-compat
   :serial t
   :components ((:file "package")
-               (:file "maclisp-compat")))
+               (:file "IOTA")))
 

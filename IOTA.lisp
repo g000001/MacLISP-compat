@@ -252,10 +252,11 @@
 ;;;
 ;;; PI has been replaced by the Maclisp system function WITHOUT-INTERRUPTS
 
-#|(DEFUN (PI MACRO) (X)
-   (LET ((Y `(WITHOUT-INTERRUPTS ,(cdr x))))
-     #-LISPM (SETQ Y (OR (MACROFETCH X) (MACROMEMO X Y 'PI)))
-     Y))|#
+(DEFMACRO PI (&WHOLE X &REST ARGS)
+   (DECLARE (IGNORE ARGS))
+   (LET ((Y #+SBCL `(SB-SYS:WITHOUT-INTERRUPTS ,@(cdr x))
+            #-SBCL `(WITHOUT-INTERRUPTS ,(cdr x))))
+     Y))
 
 
 ;;; Note that the package has loaded.
