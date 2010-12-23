@@ -32,7 +32,7 @@
    :adjoin
    :union
    )
-  ))
+  )
 
 (in-package :maclisp)
 
