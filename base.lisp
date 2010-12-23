@@ -77,19 +77,5 @@
       (- number)
       0))
 
-(cardinal 8.8)
-
-(fnorm 8)
-
-
-;; implode
-    (EQ 'ABC (IMPLODE '(A B C)))   =>   T
-
-    (IMPLODE '(A #\SPACE #\B))      =>   |A B|
-
-    (IMPLODE (EXPLODE 3))           =>   /3
-
-    (NUMBERP (IMPLODE (EXPLODE 3))) =>   NIL
-
 (defun implode (expr)
   (values (intern (format nil "~{~A~}" expr))))
