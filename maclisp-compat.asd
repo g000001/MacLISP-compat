@@ -6,5 +6,6 @@
                (:file "base")
                (:file "IOTA")
                (:file "BS")
-               (:file "APROPOS")))
+               (:file "APROPOS")
+               (:file "LSETS")))
 

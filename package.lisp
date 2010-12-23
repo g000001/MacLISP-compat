@@ -11,6 +11,12 @@
    ;; BS
    :timit
    :ntimit
+   ;; LSETS
+   :adjoin
+   :setdiff
+   :union
+   :intersection
+   :setremq
    )
   (:shadow
    ;; IOTA
@@ -22,7 +28,11 @@
    :subsetp
    ;; CARCDR
    :def-carcdr
-   ))
+   ;; LSETS
+   :adjoin
+   :union
+   )
+  ))
 
 (in-package :maclisp)
 

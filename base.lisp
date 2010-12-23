@@ -79,3 +79,6 @@
 
 (defun implode (expr)
   (values (intern (format nil "~{~A~}" expr))))
+
+(defun memq (item list)
+  (member item list :test #'eq))
