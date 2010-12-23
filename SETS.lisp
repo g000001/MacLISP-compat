@@ -102,33 +102,36 @@
 
 
 ;;; **********************SETS PACKAGE**********************
+(IN-PACKAGE :MACLISP)
 
+(keep
 (DECLARE '(MUZZLED T)
 	 (FIXNUM I N X Y Z ARGNO))
+)
 
-(DEFUN UNION ARGNO
+(DEFUN UNION (ARGNO)
        (DO ((I 1 (ADD1 I)) (AC 0))
            ((GREATERP I ARGNO) AC)
            (SETQ AC (BOR AC (ARG I)))))
 
-(DEFUN INTERSECT ARGNO
+(DEFUN INTERSECT (ARGNO)
        (DO ((I 1 (ADD1 I)) (AC (CADDDR UNIVERSE)))
            ((GREATERP I ARGNO) AC)
            (SETQ AC (BAND AC (ARG I)))))
 
-(DEFUN GATHER ARGNO
+(DEFUN GATHER (ARGNO)
        (DO ((I 1 (ADD1 I)) (AC 0))
            ((GREATERP I ARGNO) AC)
            (SETQ AC (BOR AC (EXPT 2 (OBNUM (ARG I)))))))
 
-(DEFUN SETDIFF ARGNO
+(DEFUN SETDIFF (ARGNO)
        (COND ((ZEROP ARGNO) (CADDDR UNIVERSE))
  	     ((EQUAL ARGNO 1) (DIFFERENCE (CADDDR UNIVERSE) (ARG 1)))
 	     ((DO ((I 2 (ADD1 I)) (AC (ARG 1)))
                   ((GREATERP I ARGNO) AC)
                   (SETQ AC (BDIFF AC (ARG I)))))))
 
-(DEFUN SYMDIFF ARGNO
+(DEFUN SYMDIFF (ARGNO)
        (DO ((I 1 (ADD1 I)) (AC 0))
            ((GREATERP I ARGNO) AC)
            (SETQ AC (BSYMDIFF AC (ARG I)))))
@@ -159,11 +162,11 @@
 	     ((ODDP X) (ADD1 (FCARDINAL (LSH X -1))))
 	     ((FCARDINAL (LSH X -1)))))
 
-(DEFUN FNORM MACRO (FORM)
+(DEFMACRO FNORM (FORM)
        ((LAMBDA (X)
 	 `(COND ((NOT (BIGP ,X)) (LIST ,X))
 		((CDR ,X))))
-	(CADR FORM)))
+	FORM))
 
 (DEFUN BOR (A B)  (CONSBIGNUMBER (BFOR (FNORM A) (FNORM B))))
 
@@ -208,16 +211,17 @@
 
 (DEFUN SUBSETP (A B) (ZEROP (BDIFF A B)))
 
-(DEFUN CONSBIGNUMBER (A) 
-       (COND ((ATOM A) A) ((NULL (CDR A)) (CAR A)) ((CONSBIGNUM A)))) 
-
+(DEFUN CONSBIGNUMBER (A)
+       (COND ((ATOM A) A) ((NULL (CDR A)) (CAR A)) ((CONSBIGNUM A))))
+(keep"
 (VALRET '//:VP/ ) ;;; GET SYMBOLS FROM DDT.
 
 (LAP CONSBIGNUM SUBR)
 	(JRST 0 BNCONS)
-NIL 
+NIL
+")
 
-(DECLARE (SPECIAL AW ASX)) ;;; Communicates between OBNUM, OLDOBNUM
+(DECLAIM (SPECIAL AW ASX)) ;;; Communicates between OBNUM, OLDOBNUM
 
 (DEFUN OBNUM (W)
    ;;; Converts object to a small numeric identifier for that object
