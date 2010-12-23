@@ -5,10 +5,10 @@
 ;;;  ** (c) Copyright 1981 Massachusetts Institute of Technology *************
 ;;;  *************************************************************************
 
+(in-package :MACLISP)
+
 (keep
 (herald LSETS /7))
-
-(in-package :MACLISP)
 
 ;;; Utility operations on sets:
 ;;;    ADJOIN, UNION, INTERSECTION, SETDIFF, SETREMQ
