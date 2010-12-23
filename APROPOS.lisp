@@ -6,22 +6,17 @@
 
 (IN-PACKAGE :MACLISP)
 
-(SHADOW 'APROPOS)
-
-#+MACLISP (DECLARE (SPECIAL APROPOS))
-(DECLAIM (SPECIAL APROPOS))
-
-(OR (BOUNDP 'APROPOS) (SETQ APROPOS () ))
+(DEFVAR APROPOS ())
 
 (DEFUN APROPOS (ARG)
-  (DECLARE (FIXNUM I FIRSTI MAXFIRSTI NEXTFIRSTI CN))
   (PROG (MATCHL LARG ANSL)
-      A (COND ((NOT (SYMBOLP ARG))
-	       (SETQ ARG (ERROR '|Non-symbol - APROPOS| ARG 'WRNG-TYPE-ARG))
-	       (GO A)))
+        (COND ((NOT (SYMBOLP ARG))
+	       (ERROR 'WRNG-TYPE-ARG
+                      :MESSAGE "~A Non-symbol - APROPOS"
+                      :ARGUMENT ARG)))
 	(SETQ MATCHL (EXPLODEN ARG) LARG (LENGTH MATCHL))
-	(MAPATOMS 
-	 '(LAMBDA (SYM)
+	(MAPATOMS
+	 (LAMBDA (SYM)
 	   (COND ((OR APROPOS (BOUNDP SYM) (PLIST SYM))				;Test if not TWA
 		  (DO ((FIRSTI 1 NEXTFIRSTI)					;First index for scanning
 		       (MAXFIRSTI (- (FLATC SYM) LARG -1))
@@ -34,9 +29,10 @@
 				(NFI-FL)
 				(L (CDR MATCHL) (CDR L)))
 			       ((NULL L) 'T)
+                             (DECLARE (FIXNUM I FIRSTI MAXFIRSTI NEXTFIRSTI CN))
 			     (SETQ CN (GETCHARN SYM I))
 			     (AND (NULL NFI-FL)					;Accellerator for FIRSTI
-				  (= (CAR MATCHL) CN) 
+				  (= (CAR MATCHL) CN)
 				  (SETQ NEXTFIRSTI I NFI-FL T))
 			     (AND (NOT (= (CAR L) CN)) (RETURN () )))
 			   (PUSH SYM ANSL)
@@ -45,4 +41,3 @@
 
 (DEFUN APROPOS-SORTED (ATOM)
        (SORT (APROPOS ATOM) (FUNCTION ALPHALESSP)))
-
