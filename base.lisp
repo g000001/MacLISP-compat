@@ -1,11 +1,21 @@
 ;; -*-LISP-*-
 (IN-PACKAGE :MACLISP)
 
+;;; debug var
+(defvar *RSET nil)
+
 (defmacro keep (&body body)
   (declare (ignore body))
   (values))
 
-(define-condition wrng-type-arg (error)
+;;; http://maclisp.info/pitmanual/error.html#error
+(defun error (&optional msg datum kwd)
+  (cl:error ";~@[~A~] ~@[~A~] ~@[~A~]~%"
+            kwd
+            datum
+            msg))
+
+(define-condition wrng-type-arg (cl:error)
   ((argument :reader wrng-type-arg-argument :initarg :argument)
    (message :reader wrng-type-arg-message :initarg :message))
   (:report (lambda (condition stream)
@@ -13,7 +23,7 @@
                      (wrng-type-arg-message condition)
                      (wrng-type-arg-argument condition)))))
 
-(define-condition wrng-no-args (error)
+(define-condition wrng-no-args (cl:error)
   ((argument :reader wrng-no-args-argument :initarg :argument)
    (message :reader wrng-no-args-message :initarg :message))
   (:report (lambda (condition stream)
@@ -82,3 +92,59 @@
 
 (defun memq (item list)
   (member item list :test #'eq))
+
+(defun delq (item list)
+  (declare (list list))
+  (delete item list :test #'eq))
+
+
+;;; fixme
+(defmacro herald (&rest args)
+  (declare (ignore args))
+  nil)
+
+(defmacro defconst (var val &optional doc)
+  `(defconstant ,var ,val ,@(and doc (list doc))))
+
+
+(defmacro without-interrupts (&body body)
+  `(#+sbcl sb-sys:without-interrupts
+    #-sbcl progn
+    ,@body))
+
+
+#|(defmacro CHECK-TYPE (var type-test-predicate using-function)
+   (cond ((and var (symbolp var)) () )
+	 ((fboundp 'si:check-typer)
+	   (setq var (si:check-typer var #'SYMBOLP '|CHECK-TYPE MACRO|)))
+	 ('T (error '|Not a SYMBOL| var)))
+   `(SETQ ,var (SI:CHECK-TYPER ,var ,type-test-predicate ,using-function)))|#
+
+(defun munkam (fixnum)
+  #+sbcl (sb-kernel:make-lisp-obj fixnum))
+
+(defun maknum (q)
+  #+sbcl (sb-kernel:get-lisp-obj-address q))
+
+(defun +internal-lossage (id fn datum)
+  (cl:error "~&;System error, or system code incomplete: Id '~A' in function ~A.~%~
+            ;+INTERNAL-LOSSAGE (~@*~A ~A ~A)~%~
+~%~
+            ;BKPT FAIL-ACT~%"
+         id
+         fn
+         datum))
+
+(defmacro defsimplemac (name (&rest args) &body body)
+  `(defmacro ,name (,@args) ,@body))
+
+
+(defmacro GEN-LOCAL-VAR (&optional var (gentempper () gp))
+  (declare (ignore gentempper))
+  `(gensym ,@(and var)))
+
+(defmacro check-type (&rest args)
+  (declare (ignore args))
+  nil)
+
+

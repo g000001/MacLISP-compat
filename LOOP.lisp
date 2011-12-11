@@ -262,7 +262,7 @@
 
 #+Run-on-PDP10
 (progn 'compile
-   (lap-a-list 
+   (lap-a-list
      '((lap loop-pop-source subr)
        (args loop-pop-source (() . 0))
 	   (hlrz a @ (special loop-source-code))
@@ -577,7 +577,7 @@
     '(go end-loop))
 
 #-Run-in-Maclisp
-(defmacro loop-finish () 
+(defmacro loop-finish ()
     '(go end-loop))
 
 
@@ -1118,7 +1118,7 @@
 	     (or var (push `(return ,(setq var (gensym)))
 			   loop-after-epilogue))
 	     (or (eq ctype 'list) (loop-make-iteration-variable var () dtype))
-	     (setq tail 
+	     (setq tail
 		   (cond ((eq ctype 'list)
 			    #-Hairy-Collection
 			      (setq tem (loop-make-variable (gensym) () ()))
@@ -1866,7 +1866,7 @@
 #+Run-in-Maclisp
 (defun loop-test-and-step-mapatoms-local (ob list index &aux val)
     (declare (fixnum index))
-    (prog () 
+    (prog ()
      lp (cond ((not (null (cdr list)))
 	         (rplaca list (cadr list))
 		 (rplacd list (cddr list))
@@ -1971,7 +1971,7 @@
     `(() () (multiple-value (nil ,statev1 ,statev2 ,statev3)
 	       (,(if localp 'loop-test-and-step-mapatoms-local
 		     'loop-test-and-step-mapatoms)
-		,statev1 ,statev2 ,statev3)) 
+		,statev1 ,statev2 ,statev3))
       (,variable (loop-get-mapatoms-symbol ,statev1 ,statev2 ,statev3))
       () ()))
 
@@ -2050,4 +2050,3 @@
   (or (status feature loop) (sstatus feature loop))
 #+For-NIL
   (set-feature 'loop 'local)
-

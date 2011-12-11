@@ -3,9 +3,11 @@
 (asdf:defsystem #:maclisp-compat
   :serial t
   :components ((:file "package")
+               (:file "LET")
                (:file "base")
                (:file "IOTA")
                (:file "BS")
                (:file "APROPOS")
-               (:file "LSETS")))
+               (:file "LSETS")
+               (:file "THREAD")))
 
