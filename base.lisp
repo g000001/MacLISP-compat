@@ -104,7 +104,7 @@
   nil)
 
 (defmacro defconst (var val &optional doc)
-  `(defconstant ,var ,val ,@(and doc (list doc))))
+  `(defparameter ,var ,val ,@(and doc (list doc))))
 
 
 (defmacro without-interrupts (&body body)
@@ -146,5 +146,3 @@
 (defmacro check-type (&rest args)
   (declare (ignore args))
   nil)
-
-

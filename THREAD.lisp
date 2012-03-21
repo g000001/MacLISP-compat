@@ -78,7 +78,7 @@
 (define-symbol-macro 1_20. (ash 1. 20.))
 
 
-#-Using-DEFVST (progn 'compile
+#-Using-DEFVST (eval-when (:compile-toplevel :load-toplevel :execute)
 
 (or (boundp 'THREAD-MARKER)
     (defconst THREAD-MARKER (list :THREAD)))
@@ -156,6 +156,7 @@
    "Do either CDRing or UNCDRing until either 'no-moves' moves are made,
     or until hitting the end of the thread.  Then return either the last
     (or first) cell, or return the total number of moves made."
+  (declare (ignorable fun))
   (let (((cdrp previousp countp) foo)
 	(circularity-limit #.(if (boundp 'NON-CIRCULAR-DEPTH-LIMIT)
 				 NON-CIRCULAR-DEPTH-LIMIT
@@ -222,6 +223,7 @@
 
 
 (defun THREAD-reclaim-moving (cell cdrp fun)
+  (declare (ignorable fun))
   (if *RSET (check-type cell #'THREADP fun))
   (let (tem)
      ;First, disconnect any cell which may point to this one which
