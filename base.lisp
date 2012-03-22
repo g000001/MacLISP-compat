@@ -146,3 +146,14 @@
 (defmacro check-type (&rest args)
   (declare (ignore args))
   nil)
+
+(defun load-byte (word pos size)
+  (ldb (byte size pos) word))
+
+(defun deposit-byte (word pos size val)
+  (dpb val (byte size pos) word))
+
+(defun lsh (integer count)
+  ;; 36bit fixnum
+  (ldb (byte 35 0)
+       (ash integer count)))
