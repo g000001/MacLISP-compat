@@ -13,6 +13,9 @@
 
 
 ;;;; Temporary macros
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defvar |LET.dcmp-tempvars|)
+  (defvar |LET.gensym-tempvars?| 'T))
 
 (eval-when (:compile-toplevel :execute)
 
@@ -52,9 +55,6 @@
   (defun vref (vector index)
     (declare (vector vector))
     (aref vector index))
-
-  (defvar |LET.dcmp-tempvars|)
-  (defvar |LET.gensym-tempvars?| 'T)
 
   (defmacro TRUTHITY (&rest x)
     (declare (ignore x))
@@ -238,7 +238,7 @@
 ;;;   |LET.dcmp-tempvars|, so that lambda-binding may shield parts
 ;;;   of the list;  we shield over a piece of code in which we don't want
 ;;;   certain variables to be used.
-;;; USEP = #T is similar to (), but means test out |LET.gensym-tempvars?|
+;;; USEP = #T is similar to (), but means test out |LET.gensym-empvars?|
 ;;;   to determine whether to gensym a new var, or get one from the pattern.
 ;;; USEP = <symbol> means use that symbol for a temp var.
 

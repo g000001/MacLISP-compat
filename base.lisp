@@ -79,9 +79,6 @@
 (defun bigp (obj)
   (typep obj 'bignum))
 
-(defun lsh (integer count)
-  (ash (- integer) count))
-
 (defun minus (&optional number)
   (if number
       (- number)
