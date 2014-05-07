@@ -71,7 +71,7 @@
 ;;;	    Lisp in a hung state.
 ;;;
 
-(IN-PACKAGE :MACLISP)
+(CL:IN-PACKAGE :MACLISP.internal)
 
 (DEFMACRO IOTA (&WHOLE X &REST ARGS)
    (DECLARE (IGNORE ARGS))

@@ -9,7 +9,7 @@
 ;;; For MacLISP, to compile NALET (version which destructures over vectors),
 ;;;  just load the SHARPC module, and set TARGET-FEATURES to 'NILAID
 
-(in-package :maclisp)
+(in-package :maclisp.internal)
 
 
 ;;;; Temporary macros

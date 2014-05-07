@@ -1,3 +1,6 @@
+(in-package :maclisp)
+(named-readtables:in-readtable :nil)
+
 ;;;   DRAMMP 						  -*-LISP-*-
 ;;;   **************************************************************
 ;;;   *** NIL *** Del, Rem, Ass, Mem, and Pos type functions *******

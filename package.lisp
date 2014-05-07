@@ -1,26 +1,12 @@
-(defpackage :maclisp
-  (:use :cl)
-  (:shadow
-   ;; IOTA
-   :pi
-   ;; APROPOS
-   :apropos
-   ;; SETS
-   :union
-   :subsetp
-   ;; CARCDR
-   :def-carcdr
-   ;; LSETS
-   :adjoin
-   :union
-   :intersection
-   :let
-   :let*
-   :check-type
-   :error
-   )
+(cl:in-package :cl-user)
+
+#|(cl:delete-package :maclisp)|#
+(cl:defpackage :maclisp
+  (:use)
+  (:nicknames :ml)
   (:export
    ;; IOTA
+   :do
    :iota
    :phi
    :pi
@@ -51,7 +37,37 @@
    "THREAD-RECLAIM-CDRING"
    "THREAD-RECLAIM-UNCDRING"
    "THREAD-RECLAIM-1"
+   :subsetp
+   :let
+   :let*
+   :check-type
+   :error
+   :cerror
+   :def-carcdr
    )
   )
 
-(in-package :maclisp)
+
+
+(cl:defpackage :maclisp.internal
+  (:use :cl :named-readtables
+        :maclisp)
+  (:shadowing-import-from :maclisp
+                          :pi
+                          ;; APROPOS
+                          :apropos
+                          :do
+                          ;; SETS
+                          :union
+                          :subsetp
+                          ;; CARCDR
+                          ;; LSETS
+                          :adjoin
+                          :union
+                          :intersection
+                          :let
+                          :let*
+                          :check-type
+                          :error
+                          :cerror
+                          ))

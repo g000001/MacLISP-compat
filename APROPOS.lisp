@@ -4,7 +4,7 @@
 ; Example:  (APROPOS 'CHAR) returns
 ;    (CHARPOS GETCHAR GETCHARN)
 
-(IN-PACKAGE :MACLISP)
+(IN-PACKAGE :MACLISP.internal)
 
 (DEFVAR APROPOS ())
 

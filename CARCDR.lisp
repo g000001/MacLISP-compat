@@ -1,5 +1,10 @@
 ;;; -*-LISP-*-
 
+(cl:in-package :maclisp.internal)
+#|(named-readtables:in-readtable :maclisp)|#
+
+;(named-readtables:in-readtable :standard)
+
 ;;; Purpose:  to permit long names, like CADADADADDDR, to be easily
 ;;;    macro-defined into appropriate sequences of CARs and CDRs.
 ;;; Use: (DEF-CARCDR CADADADADDDR CADADADDDDDR ... )
@@ -10,7 +15,6 @@
 ;;;    LAMBDA form with a composition of initial carcdr functions
 ;;;    of up to 4 deep, which should be (already) defined primitively.
 
-(IN-PACKAGE :MACLISP)
 
 (DEFMACRO DEF-CARCDR (&rest carcdrs)
     `(PROGN ,@(mapcar (lambda (x)
@@ -18,22 +22,39 @@
                            ,(c*r (list x 'list))))
                       carcdrs)))
 
+
 (DEFUN C*R (X)
-#|   (LET (((NAME ARG1 . L) X))|#
-     (destructuring-bind (NAME ARG1 . L) X
-	(AND L (ERROR 'WRNG-NO-ARGS
-                      :message "~A Extra args in call to C*R macro"
-                      :argument X))
+  (destructuring-bind (NAME ARG1 . L) X
+    (AND L (ERROR 'WRNG-NO-ARGS
+                  :message "~A Extra args in call to C*R macro"
+                  :argument X))
+    (AND (OR (< (LENGTH (SETQ L (EXPLODEC NAME))) 7)
+             (NOT (EQ (CAR L) 'C))
+             (NOT (EQ (CAR (SETQ L (NREVERSE (CDR L)))) 'R))
+             (DO ((L (SETQ L (NREVERSE (CDR L))) (CDR L))) ((NULL L))
+               (AND (NOT (MEMBER (CAR L) '(A D))) (RETURN 'T))))
+         (ERROR 'WRNG-TYPE-ARG
+                :message "~A Invalid name for C*R macro|"
+                :argument X))
+    `((LAMBDA (X) ,(|c*r-expander\|| l 'x))
+      ,arg1)))
+
+(DEFUN C*R (X)
+   (DECLARE (SPECIAL CARCDR))		;Gets the complr's CARCDR variable
+   (LET (((NAME ARG1 . L) X))
+	(AND L (ERROR '|Extra args in call to C*R macro| X 'WRNG-NO-ARGS))
 	(AND (OR (< (LENGTH (SETQ L (EXPLODEC NAME))) 7)
 		 (NOT (EQ (CAR L) 'C))
 		 (NOT (EQ (CAR (SETQ L (NREVERSE (CDR L)))) 'R))
-		 (DO ((L (SETQ L (NREVERSE (CDR L))) (CDR L))) ((NULL L))
-		     (AND (NOT (MEMBER (CAR L) '(A D))) (RETURN 'T))))
-	     (ERROR 'WRNG-TYPE-ARG
-                    :message "~A Invalid name for C*R macro|"
-                    :argument X))
-	`((LAMBDA (X) ,(|c*r-expander\|| l 'x))
-          ,arg1)))
+		 (DO L (SETQ L (NREVERSE (CDR L))) (CDR L) (NULL L)
+		     (AND (NOT (MEMQ (CAR L) '(A D))) (RETURN 'T))))
+	     (ERROR '|Invalid name for C*R macro| X 'WRNG-TYPE-ARG))
+	`(,(COND #|((EQ COMPILER-STATE 'COMPILE) `(,carcdr ,@(nreverse l)))|#
+		 (`(LAMBDA (X) ,(|c*r-expander\|| l 'X))))
+	  ,arg1)))
+
+
+
 
 (DEFUN |c*r-expander\|| (L ARG)
   (COND ((< (LENGTH L) 5) `(,(implode (nconc (list 'C) l '(R))) ,arg))

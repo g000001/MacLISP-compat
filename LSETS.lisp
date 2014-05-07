@@ -5,7 +5,7 @@
 ;;;  ** (c) Copyright 1981 Massachusetts Institute of Technology *************
 ;;;  *************************************************************************
 
-(in-package :MACLISP)
+(in-package :MACLISP.internal)
 
 (keep
 (herald LSETS /7))

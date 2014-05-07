@@ -5,7 +5,7 @@
 ;;; ******** (c) Copyright 1981 Massachusetts Institute of Technology ********
 ;;; **************************************************************************
 
-(in-package :maclisp)
+(in-package :maclisp.internal)
 
 (herald THREAD /7)
 

@@ -16,7 +16,7 @@
 ;;; Function "B-BS" will run a break loop in the environment indicated
 ;;;   by the frame in "BS"
 
-(in-package :maclisp)
+(in-package :maclisp.internal)
 #|||
 (DECLARE (*FEXPR TIMIT NTIMIT BS FS)
 	 (*EXPR B-BS)

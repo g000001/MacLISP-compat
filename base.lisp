@@ -1,5 +1,5 @@
 ;; -*-LISP-*-
-(IN-PACKAGE :MACLISP)
+(IN-PACKAGE :MACLISP.internal)
 
 ;;; debug var
 (defvar *RSET nil)
@@ -46,9 +46,9 @@
       (write-to-string expr)))))
 
 (defun mapatoms (function)
-  (let (ans)
+  (cl:let (ans)
     (do-all-symbols (s)
-      (push (funcall function s) ans))
+      (cl:push (funcall function s) ans))
     ans))
 
 (defun getcharn (string-designator pos)
@@ -154,3 +154,12 @@
   ;; 36bit fixnum
   (ldb (byte 35 0)
        (ash integer count)))
+
+
+(defmacro ml:do (binds &rest args)
+  (typecase binds
+    ((and symbol (not list))
+     `(cl:do ((,binds ,(elt args 0) ,(elt args 1)))
+           (,(elt args 2))
+        ,@(nthcdr 2 args)))
+    (list `(cl:do ,binds ,@args))))
