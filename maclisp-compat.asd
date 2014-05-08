@@ -4,8 +4,8 @@
   :serial t
   :depends-on (:named-readtables)
   :components ((:file "package")
-               (:file "LET")
                (:file "base")
+               (:file "LET")
                (:file "IOTA")
                (:file "BS")
                (:file "APROPOS")
